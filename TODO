@@ -1,0 +1,3 @@
+Every vehicle will send its plate number which will be used as a key in the database
+On first launch, the app will query for all the registered plates and save them in the local storage, so that to minimise the read limit
+The client app will query te database and get all the key if the user want full update

@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "1095723169423",
+    "project_id": "fleet-management-f98c4",
+    "storage_bucket": "fleet-management-f98c4.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1095723169423:android:24db0dc85a09037341e2fa",
+        "android_client_info": {
+          "package_name": "com.jetsup.fleetmanagement"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1095723169423-kse5k07mlkf43h21alk6r09efddjt88m.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBxakDN6Xn9yzbxfTGKpFY4k_whUXGVMBg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1095723169423-kse5k07mlkf43h21alk6r09efddjt88m.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
