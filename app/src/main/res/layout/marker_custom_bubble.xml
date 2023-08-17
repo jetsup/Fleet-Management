@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:padding="10dp"
+    tools:ignore="HardcodedText">
+    <!--    bubble_title,bubble_description, bubble_subdescription, bubble_image-->
+    <!--    Hide the Views so that I can Interact with custom Views-->
+    <ImageView
+        android:id="@+id/bubble_image"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        tools:ignore="ContentDescription" />
+
+    <TextView
+        android:id="@+id/bubble_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/bubble_description"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/bubble_subdescription"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/markerBubbleImageView"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:src="@drawable/btn_moreinfo" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="5dp"
+        android:layout_toEndOf="@id/markerBubbleImageView"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/markerBubbleDriveName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="John Doe"
+                android:textColor="#9C27B0"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/markerBubbleDrivePhone"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:text="(0700000000)"
+                android:textColor="#3F51B5"
+                android:textSize="18sp" />
+        </LinearLayout>
+        <!--Include the drive work number-->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Last Logged:"
+                android:textColor="#2196F3"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/markerBubbleLastLogTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:text="08-17-2023 12:00:00"
+                android:textColor="#9C27B0"
+                android:textSize="18sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Lng:"
+                android:textColor="#2196F3"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/markerBubbleLastLongitude"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:text="37.045632"
+                android:textColor="#9C27B0"
+                android:textSize="18sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:text="Lat:"
+                android:textColor="#2196F3"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/markerBubbleLastLatitude"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:text="37.045632"
+                android:textColor="#9C27B0"
+                android:textSize="18sp" />
+        </LinearLayout>
+    </LinearLayout>
+</RelativeLayout>

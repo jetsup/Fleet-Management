@@ -1,45 +1,36 @@
 package com.jetsup.fleetmanagement.model;
 
-public class VehicleModel {
-    private String numberPlate, driverName;
-    private double longitude, latitude;
+import androidx.annotation.NonNull;
 
-    public VehicleModel(String driverName, String numberPlate, double latitude, double longitude) {
+public class VehicleModel {
+    private final int vehicleID, driverID;
+    private final String numberPlate;
+
+    public VehicleModel(int vehicleID, String numberPlate, int driverID) {
+        this.vehicleID = vehicleID;
         this.numberPlate = numberPlate;
-        this.driverName = driverName;
-        this.longitude = longitude;
-        this.latitude = latitude;
+        this.driverID = driverID;
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+        return "VEHICLE{" +
+                "vehicleID=" + vehicleID +
+                ", driverID=" + driverID +
+                ", numberPlate='" + numberPlate + '\'' +
+                '}';
     }
 
     public String getNumberPlate() {
         return numberPlate;
     }
 
-    public void setNumberPlate(String numberPlate) {
-        this.numberPlate = numberPlate;
+    public int getVehicleID() {
+        return vehicleID;
     }
 
-    public String getDriverName() {
-        return driverName;
-    }
-
-    public void setDriverName(String driverName) {
-        this.driverName = driverName;
-    }
-
-    public double getLongitude() {
-        return longitude;
-    }
-
-    public void setLongitude(double longitude) {
-        this.longitude = longitude;
-    }
-
-    public double getLatitude() {
-        return latitude;
-    }
-
-    public void setLatitude(double latitude) {
-        this.latitude = latitude;
+    public int getDriverID() {
+        return driverID;
     }
 }

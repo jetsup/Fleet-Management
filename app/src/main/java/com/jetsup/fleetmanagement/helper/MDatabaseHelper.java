@@ -1,5 +1,12 @@
 package com.jetsup.fleetmanagement.helper;
 
+import static com.jetsup.fleetmanagement.util.GlobalsConstants.DATABASE_NAME;
+import static com.jetsup.fleetmanagement.util.GlobalsConstants.DRIVER_TB_DRIVER_EMAIL;
+import static com.jetsup.fleetmanagement.util.GlobalsConstants.DRIVER_TB_DRIVER_ID;
+import static com.jetsup.fleetmanagement.util.GlobalsConstants.DRIVER_TB_DRIVER_NAME;
+import static com.jetsup.fleetmanagement.util.GlobalsConstants.DRIVER_TB_DRIVER_PHONE;
+import static com.jetsup.fleetmanagement.util.GlobalsConstants.DRIVER_TB_FROM_DATE;
+import static com.jetsup.fleetmanagement.util.GlobalsConstants.DRIVER_TB_NAME;
 import static com.jetsup.fleetmanagement.util.GlobalsConstants.FLEET_TB_NAME;
 import static com.jetsup.fleetmanagement.util.GlobalsConstants.FLEET_TB_NUMBER_PLATE;
 import static com.jetsup.fleetmanagement.util.GlobalsConstants.FLEET_TB_VEHICLE_ID;
@@ -11,7 +18,6 @@ import static com.jetsup.fleetmanagement.util.GlobalsConstants.LOG_TB_PARENT_VEH
 import static com.jetsup.fleetmanagement.util.GlobalsConstants.LONGITUDE;
 import static com.jetsup.fleetmanagement.util.GlobalsConstants.M_TAG;
 
-import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -20,26 +26,23 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 
+import com.jetsup.fleetmanagement.DatabaseLogs;
+import com.jetsup.fleetmanagement.model.DriverModel;
+import com.jetsup.fleetmanagement.model.LogModel;
 import com.jetsup.fleetmanagement.model.VehicleModel;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class MDatabaseHelper extends SQLiteOpenHelper {
 
-    private final Context context;
-    public String DRIVER_TB_NAME = "drivers";
-    public String DRIVER_TB_DRIVER_ID = "driver_id";
-    public String DRIVER_TB_DRIVER_NAME = "driver_name";
-    public String DRIVER_TB_DRIVER_PHONE = "driver_phone";
-    public String DRIVER_TB_DRIVER_EMAIL = "driver_email";
-    public String DRIVER_TB_VEHICLE_ID = "driver_vehicle_id";
+    Map<Integer, DriverModel> driverModelMap;
+    Map<Integer, VehicleModel> vehicleIdMap;
+    Map<Integer, LogModel> logModelMap;
 
     public MDatabaseHelper(@Nullable Context context) {
-        super(context, "FleetManagement.db", null, 1);
-        this.context = context;
+        super(context, DATABASE_NAME, null, 1);
     }
 
     @Override
@@ -50,88 +53,105 @@ public class MDatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        // "CREATE TABLE fleet (vehicle_id INTEGER PRIMARY KEY AUTOINCREMENT, number_plate TEXT UNIQUE)"
+        // "CREATE TABLE fleet (vehicle_id INTEGER PRIMARY KEY AUTOINCREMENT, number_plate TEXT UNIQUE, driver_id INTEGER, FOREIGN KEY(driver_id) REFERENCES drivers(driver_id))"
+        // vehicle_id, number_plate, driver_id
         String createTableQuery = "CREATE TABLE " + FLEET_TB_NAME +
-                " (" + FLEET_TB_VEHICLE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " + FLEET_TB_NUMBER_PLATE + " TEXT UNIQUE)";
+                " (" + FLEET_TB_VEHICLE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " + FLEET_TB_NUMBER_PLATE + " TEXT UNIQUE, " +
+                DRIVER_TB_DRIVER_ID + " INTEGER, " +
+                "FOREIGN KEY(" + DRIVER_TB_DRIVER_ID + ") REFERENCES " + DRIVER_TB_NAME + "(" + DRIVER_TB_DRIVER_ID + ") ON DELETE SET NULL)";
         db.execSQL(createTableQuery);
-        // Create Drivers' table
-        // Might include worker ID
-        String createDriversTableQuery = "CREATE TABLE " + DRIVER_TB_NAME + " (" + DRIVER_TB_DRIVER_ID +
-                " INTEGER PRIMARY KEY AUTOINCREMENT, " + DRIVER_TB_DRIVER_NAME + " TEXT, " +
-                DRIVER_TB_DRIVER_PHONE + " TEXT UNIQUE, " + DRIVER_TB_DRIVER_EMAIL + " TEXT UNIQUE, " + DRIVER_TB_VEHICLE_ID + " INTEGER, " +
-                "FOREIGN KEY(" + DRIVER_TB_VEHICLE_ID + ") REFERENCES " + FLEET_TB_NAME + "(" + FLEET_TB_VEHICLE_ID + "))";
+        Log.i(M_TAG, "Fleet table created");
+        // CREATE TABLE drivers (driver_id INTEGER PRIMARY KEY AUTOINCREMENT, driver_name TEXT,
+        // driver_phone TEXT UNIQUE, driver_email TEXT UNIQUE, from_date DATE DEFAULT CURRENT_DATE
+        // driver_id, driver_name, driver_phone, driver_email, from_date
+        String createDriversTableQuery = "CREATE TABLE " + DRIVER_TB_NAME +
+                " (" + DRIVER_TB_DRIVER_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " + DRIVER_TB_DRIVER_NAME + " TEXT NOT NULL, " +
+                DRIVER_TB_DRIVER_PHONE + " TEXT NOT NULL UNIQUE, " + DRIVER_TB_DRIVER_EMAIL + " TEXT NOT NULL UNIQUE, " +
+                DRIVER_TB_FROM_DATE + " TIMESTAMP DEFAULT CURRENT_TIMESTAMP)";
         db.execSQL(createDriversTableQuery);
-        //  "CREATE TABLE logs (log_id INTEGER PRIMARY KEY AUTOINCREMENT, parent_vehicle_id INTEGER,
+        Log.i(M_TAG, "Drivers table created");
+        //  "CREATE TABLE logs (log_id INTEGER PRIMARY KEY AUTOINCREMENT, parent_vehicle_id INTEGER UNIQUE, driver_id INTEGER UNIQUE,
         //  latitude TEXT, longitude TEXT, logged_time TEXT, FOREIGN KEY(parent_vehicle_id) REFERENCES FLEET_TABLE(vehicle_id))"
+        // log_id, parent_vehicle_id, driver_id, latitude, longitude, logged_time
         String createDataTableQuery = "CREATE TABLE " + LOG_TB_NAME +
-                " (" + LOG_TB_LOG_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " + LOG_TB_PARENT_VEHICLE_ID +
-                " INTEGER, " + LATITUDE + " REAL, " + LONGITUDE + " REAL, " + LOG_TB_LOGGED_TIME + " TEXT," +
-                " FOREIGN KEY(" + LOG_TB_PARENT_VEHICLE_ID + ") REFERENCES " + FLEET_TB_NAME + "(vehicle_id))";
+                " (" + LOG_TB_LOG_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " + LOG_TB_PARENT_VEHICLE_ID + " INTEGER UNIQUE, " +
+                DRIVER_TB_DRIVER_ID + " INTEGER UNIQUE, " + LATITUDE + " TEXT, " + LONGITUDE + " TEXT, " +
+                LOG_TB_LOGGED_TIME + " TEXT, " +
+                "FOREIGN KEY(" + LOG_TB_PARENT_VEHICLE_ID + ") REFERENCES " + FLEET_TB_NAME + "(" + FLEET_TB_VEHICLE_ID + ") ON DELETE SET NULL," +
+                "FOREIGN KEY(" + DRIVER_TB_DRIVER_ID + ") REFERENCES " + DRIVER_TB_NAME + "(" + DRIVER_TB_DRIVER_ID + ") ON DELETE SET NULL)";
         db.execSQL(createDataTableQuery);
+        Log.i(M_TAG, "Logs table created");
+
+        // TODO: Fetch the data below from Firebase
+        String firstInsertQuery = "INSERT INTO " + DRIVER_TB_NAME + " (" + DRIVER_TB_DRIVER_NAME + ", " +
+                DRIVER_TB_DRIVER_PHONE + ", " + DRIVER_TB_DRIVER_EMAIL + ", " + DRIVER_TB_FROM_DATE + ") " +
+                "VALUES ('Admin', '0700000000', 'admin@fleet.com', '08-17-2023 200020')";
+        db.execSQL(firstInsertQuery);
+        firstInsertQuery = "INSERT INTO " + FLEET_TB_NAME + " (" + FLEET_TB_NUMBER_PLATE + ", " + DRIVER_TB_DRIVER_ID + ") " +
+                "VALUES ('KAA 123A', 1)";
+        db.execSQL(firstInsertQuery);
+        firstInsertQuery = "INSERT INTO " + LOG_TB_NAME + " (" + LOG_TB_PARENT_VEHICLE_ID + ", " + DRIVER_TB_DRIVER_ID + ", " +
+                LATITUDE + ", " + LONGITUDE + ", " + LOG_TB_LOGGED_TIME + ") " +
+                "VALUES (1, 1, '-0.786801', '37.045632', '08-17-2023 200020')";
+        db.execSQL(firstInsertQuery);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-
     }
 
-    /**
-     * Add data the very first data to the database
-     *
-     * @param carPlate   the car plate number
-     * @param latitude   the latitude position of organisation
-     * @param longitude  the longitude position of organisation
-     * @param loggedTime the time the data was logged
-     * @return true if data is added successfully, false otherwise
-     */
-    public boolean addFirstData(String carPlate, double latitude, double longitude, String loggedTime) {
+    public ArrayList<LogModel> fetchAllData() {
+        ArrayList<LogModel> loggedData = new ArrayList<>();
         SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(FLEET_TB_NUMBER_PLATE, carPlate);
-        Log.d(M_TAG, "addData: Adding " + carPlate + " to " + FLEET_TB_NAME);
-        long result = db.insert(FLEET_TB_NAME, null, contentValues);
-        if (result == -1) {
-            Log.d(M_TAG, "addData: Failed to add " + carPlate + " to " + FLEET_TB_NAME);
-            return false;
-        }
-        contentValues.clear();
-        contentValues.put(LOG_TB_PARENT_VEHICLE_ID, carPlate);
-        contentValues.put(LATITUDE, latitude);
-        contentValues.put(LONGITUDE, longitude);
-        contentValues.put(LOG_TB_LOGGED_TIME, loggedTime);
-        Log.d(M_TAG, "addData: Adding " + carPlate + " to " + LOG_TB_NAME);
-        result = db.insert(LOG_TB_NAME, null, contentValues);
-        if (result == -1) {
-            Log.d(M_TAG, "addData: Failed to add " + carPlate + " to " + LOG_TB_NAME);
-            return false;
-        }
-        //if data as inserted incorrectly it will return -1
-        return true;
-    }
 
-    public List<VehicleModel> fetchAllData() {
-        SQLiteDatabase db = this.getWritableDatabase();
-        // Query the FLEE_TABLE_NAME table for all data so as to get the ID of the vehicle
         // SELECT * FROM fleet
+        // vehicle_id, number_plate, driver_id
         Cursor cursor = db.rawQuery("SELECT * FROM " + FLEET_TB_NAME, null);
-        Map<Integer, String> vehicleIdMap = new HashMap<>();
+        vehicleIdMap = new HashMap<>();
         if (cursor.moveToFirst()) {
             do {
-                vehicleIdMap.put(cursor.getInt(0), cursor.getString(1));
+                vehicleIdMap.put(cursor.getInt(0)/*vehicle_id*/,
+                        new VehicleModel(cursor.getInt(0), cursor.getString(1),
+                                cursor.getInt(2)));
             } while (cursor.moveToNext());
         }
+        DatabaseLogs.vehicleIdMap = vehicleIdMap;
+        Log.i(M_TAG, "Vehicle ID Map: " + vehicleIdMap.toString());
         cursor.close();
+
+        // SELECT * FROM drivers
+        // driver_id, driver_name, driver_phone, driver_email, from_date
+        driverModelMap = new HashMap<>(); // DriverID and NumberPlate
+        cursor = db.rawQuery("SELECT * FROM " + DRIVER_TB_NAME, null);
+        if (cursor.moveToFirst()) {
+            do {
+                driverModelMap.put(cursor.getInt(0),
+                        new DriverModel(cursor.getInt(0), cursor.getString(1),
+                                cursor.getString(2), cursor.getString(3), cursor.getString(4)));
+            } while (cursor.moveToNext());
+        }
+        DatabaseLogs.driverModelMap = driverModelMap;
+        Log.i(M_TAG, "Driver Model Map: " + driverModelMap.toString());
+        cursor.close();
+
         // SELECT * FROM logs
-        // id(int) | vehicle_id(int) | latitude(double) | longitude(double) | logged_time(text)
+        // log_id, parent_vehicle_id, driver_id, latitude, longitude, logged_time
+        logModelMap = new HashMap<>();
         cursor = db.rawQuery("SELECT * FROM " + LOG_TB_NAME, null);
-        List<VehicleModel> dataList = new ArrayList<>();
         if (cursor.moveToFirst()) {
             do {
-                dataList.add(new VehicleModel("John Doe", vehicleIdMap.get(cursor.getInt(1)),
-                        cursor.getDouble(2), cursor.getDouble(3)));
+                logModelMap.put(cursor.getInt(0),
+                        new LogModel(cursor.getInt(0), cursor.getInt(1),
+                                cursor.getInt(2), cursor.getDouble(3),
+                                cursor.getDouble(4), cursor.getString(5)));
+                loggedData.add(new LogModel(cursor.getInt(0), cursor.getInt(1), cursor.getInt(2),
+                        cursor.getDouble(3), cursor.getDouble(4), cursor.getString(5)));
             } while (cursor.moveToNext());
         }
+        DatabaseLogs.logModelMap = logModelMap;
+        Log.i(M_TAG, "Log Model Map: " + logModelMap.toString());
         cursor.close();
-        return dataList;
+        Log.i(M_TAG, "Logged Data: " + loggedData);
+        return loggedData;
     }
 }
